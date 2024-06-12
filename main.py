@@ -4,6 +4,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import re
+import csv
 
 DEBUG = True
 page = 1
@@ -35,6 +36,7 @@ class Announcement:
         self.title = _title
         self.price = _price
         self.image_url = _image_url
+        self.region = _region
         self.labels = _labels
         self.actual_floor = _actual_floor
         self.max_floor = _max_floor
@@ -44,10 +46,10 @@ class Announcement:
         self.sq_price = 99999999
 
     def __repr__(self):
-        return f"Announcement(link={self.link}, title={self.title}, price={self.price}), sq_price={self.sq_price})"
+        return f"Announcement(link={self.link}, title={self.title}, price={self.price}, sq_price={self.sq_price})"
 
     def calculate_sq_price(self):
-        self.sq_price = self.price / self.size
+        self.sq_price = self.price / self.size if self.size != 0 else 99999999
 
 page_content = get_page_content(url)
 if page_content:
@@ -182,3 +184,25 @@ print(f"There are {len(data_diff)} different items in the list.")
 with open('data.json', 'w') as json_file:
     json.dump(data, json_file, indent=4)
 print("Data written to data.json")
+
+# Save announcements to a CSV file
+csv_file = 'announcements.csv'
+with open(csv_file, 'w', newline='') as csvfile:
+    fieldnames = ['Link', 'Title', 'Price', 'Image URL', 'Region', 'Labels', 'Actual Floor', 'Max Floor', 'Size', 'Rooms', 'Square Price']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for ann in sorted_announcements:
+        writer.writerow({
+            'Link': ann.link,
+            'Title': ann.title,
+            'Price': ann.price,
+            'Image URL': ann.image_url,
+            'Region': ann.region,
+            'Labels': ann.labels,
+            'Actual Floor': ann.actual_floor,
+            'Max Floor': ann.max_floor,
+            'Size': ann.size,
+            'Rooms': ann.rooms,
+            'Square Price': ann.sq_price
+        })
+print(f"Data written to {csv_file}")
