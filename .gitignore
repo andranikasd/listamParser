@@ -1,2 +1,8 @@
 venv
 env
+.env
+listamparser
+listamparser.exe
+data.json
+announcements.html
+announcements.csv
